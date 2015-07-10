@@ -6,26 +6,29 @@ function initialize() {
   }
   var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
+  map.data.loadGeoJson('bike_times.geojson');
 
+  map.data.setStyle(function(feature) {
+    var bike_time = feature.getProperty('Biking time [s]');
+    var color = 'red';
+    var opacity = .2
+      if( bike_time < 35*60 ){ color='blue'};
+      if( bike_time < 30*60 ){ color='yellow'};
+      if( bike_time < 25*60 ){ color='green'};
+      if( bike_time < 20*60 ){ color='orange'};
+      if( bike_time < 15*60 ){ color='teal'};
+      if( bike_time == -1){ opacity = 0};
     
-var    x1 = 59.29;
-var    x2 = 59.40;
-var    y1  = 17.98;
-var    y2  = 18.15;
-var dx = x2-x1;
-var dy = y2-y1;
-
-for (i = 0; i < 10; i++) { 
-  for (j = 0; j <10; j++) {
-      var markLatlng = new google.maps.LatLng(x1+i*dx/10,y1+j*dy/10)
-      new google.maps.Marker({
-	  position: markLatlng,
-	  map: map
-      });
-  }
-}
-  
-
+    return {
+      icon: {
+        path: google.maps.SymbolPath.CIRCLE,
+        scale: 6,
+        strokeWeight: 0,
+        fillColor: color,
+        fillOpacity: opacity
+      }
+    }
+  })
 }
 
 google.maps.event.addDomListener(window, 'load', initialize);
