@@ -124,7 +124,7 @@ def fetch(n,origin,filename,format):
 
                     features.append(feature)
                     break
-
+                    
                 elif content['status'] == 'OVER_QUERY_LIMIT':
                     print 'made an over-query limit... retrying in 10 seconds'
                     time.sleep(10)

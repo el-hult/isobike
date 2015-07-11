@@ -1,12 +1,22 @@
-from skimage import data, io, filter
+import skimage
 
 
-def curvefinder(array):
-	print 'lol'
+def curvesfinder(array,values):
+	call the function for single values for each value
+	assemble the featueres in a feature collection
 
+def curvefinder(array,value):
+	check that the value is indeed a float
+	call the find contours function
+	format the output as a geojson feature 
+
+def read_array(filename):
+	check that its a file
+	check that the file is a geojson file
+	create long- and lat- and time- matrices
+	return the matrices
 
 if __name__ == '__main__':
-	image = data.coins() # or any NumPy array!
-	edges = filter.sobel(image)
-	io.imshow(edges)
-	io.show()
+	
+	call readarray on the relevant file
+	call the curvesfinder with relevant values
