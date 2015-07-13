@@ -12,13 +12,15 @@ class InputDataError(Exception):
          return repr('Errorneous data fed to '+self.calling_context+':'+self.value)
 
 def tsv2geojson(input_filename):
-	filename_prefix = input_filename.split('.')[0]
-	input_filename_suffix = input_filename.split('.')[1]
 
 	if not(os.path.isfile(input_filename)):
 		raise InputDataError('tsv2gjson','File doesn\'t esist.')
+
+	input_filename_prefix, input_filename_suffix = os.path.splitext(input_filename)
+
 	if input_filename_suffix != 'tsv':
 		raise InputDataError('tsv2gjson','Wrong file ending.')
+		
 	output_filename = filename_prefix+'.geojson'
 
 

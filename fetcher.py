@@ -18,7 +18,7 @@ class APIError(Exception):
 def fetch(n,origin,filename,format):
 
     lat1 = 59.29
-    lat2 = 59.40
+    lat2 = 59.37
     long1  = 17.96
     long2  = 18.15
     delta_lat = (lat2-lat1)/(n-1)
@@ -82,7 +82,7 @@ def fetch(n,origin,filename,format):
         for current_node_id in range(1,n*n+1):
             i =  (current_node_id-1) % n
             j =  (current_node_id-1) // n
-            print 'i j n = 'i,j,n
+            print 'i j n = ',i,j,current_node_id
             
             destination_lat  = lat1 +i*delta_lat
             destination_long = long1+j*delta_long
@@ -109,13 +109,13 @@ def fetch(n,origin,filename,format):
 
                     geom = {\
                         'type': 'Point', \
-                        'coordinates': [destination_lat,\
-                                        destination_long]}
+                        'coordinates': [destination_long,\
+                                        destination_lat]}
                     props = {\
                         'Destination name': final_address, \
                         'Biking time [s]': biking_time,\
-                        'Longitude index': i,\
-                        'Latitude index': j}
+                        'Longitude index': j,\
+                        'Latitude index': i}
 
                     feature = dict(\
                         type = 'Feature', \
@@ -145,5 +145,9 @@ def fetch(n,origin,filename,format):
 
 
 ## Setup
-n = 3
-fetch(n,'Acando, Malmskillnadsgatan, Stockholm','bike_times','geojson')
+
+if __name__ == '__main__':
+    n = 43
+    fetch(n,\
+        'Acando, Malmskillnadsgatan, Stockholm',\
+        'bike_times_'+str(n),'geojson')
