@@ -144,7 +144,7 @@ if __name__ == '__main__':
 		'bike_times_'+str(n)+'.geojson')
 	# print data
 	levels = [10, 15, 20, 25, 30, 35]
-	levels[:] = [x*3 for x in levels] 
+	levels[:] = [x*60 for x in levels] 
 
 	# call the curvesfinder with relevant values
 	level_set_geojson = curvesfinder(data,levels)
