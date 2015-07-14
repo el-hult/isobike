@@ -11,11 +11,11 @@ import skimage.measure
 import matplotlib.pyplot as plt
 
 class InputDataError(Exception):
-     def __init__(self, value,calling_context):
-         self.value = value
+     def __init__(self, message,calling_context):
+         self.message = message
          self.calling_context = calling_context
      def __str__(self):
-         return repr('Errorneous data fed to '+self.calling_context+':'+self.value)
+         return repr('Errorneous data fed to '+self.calling_context+':'+self.message)
 
 
 def curvesfinder(array,values):
@@ -73,7 +73,7 @@ def read_array(filename):
 
 	# check that its a proper file
 	if not(os.path.isfile(filename)):
-		raise InputDataError('read_array','File doesn\'t esist.')
+		raise InputDataError('read_array','File '+filename+'doesn\'t exist.')
 
 	filename_prefix, filename_suffix = os.path.splitext(filename)
 	accepted_file_endings=['.geojson', '.gjson', '.json']
@@ -137,9 +137,11 @@ def read_array(filename):
 
 if __name__ == '__main__':
 	
+	n=43
+
 	# call readarray on the relevant file
 	data = read_array(\
-		'bike_times_.geojson')
+		'bike_times_'+str(n)+'.geojson')
 	# print data
 	# levels = [10, 15, 20, 25, 30, 35]
 	levels = [15*60]
@@ -147,7 +149,7 @@ if __name__ == '__main__':
 	# call the curvesfinder with relevant values
 	level_set_geojson = curvesfinder(data,levels)
 
-	with codecs.open('level_sets_16.geojson', encoding='utf-8',mode='w') as output_file:
+	with codecs.open('level_sets_'+str(n)+'.geojson', encoding='utf-8',mode='w') as output_file:
             json.dump(level_set_geojson,output_file,indent=1,encoding="utf-8",ensure_ascii=False)
 
 	# print level_set_geojson
