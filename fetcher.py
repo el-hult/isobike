@@ -88,9 +88,6 @@ def fetch(n,origin,filename):
     with codecs.open(filename+'.geojson', encoding='utf-8',mode='w') as output_file:
         json.dump(json_object,output_file,indent=1,encoding="utf-8",ensure_ascii=False)
 
-else:
-    raise SyntaxError('The only allowed formats are tsv and geojson!')
-
 
 ## Setup
 
