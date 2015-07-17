@@ -5,6 +5,7 @@ import requests
 import codecs
 import math
 import numpy
+import scipy.interpolate
 import skimage.measure
 
 #only for debugging
@@ -17,6 +18,34 @@ class InputDataError(Exception):
      def __str__(self):
          return repr('Errorneous data fed to '+self.calling_context+':'+self.message)
 
+def eliminate_nans(array):
+
+	# check input
+	n,ny = array.shape
+	if n != ny:
+		raise ValueError('Not square array!')
+
+	# reshape the data for griddata
+	nan_filter = numpy.isnan(array)
+	not_nan = array[~nan_filter]
+	x_mat = numpy.tile(numpy.array(range(0,n)),[n,1])
+	y_mat = numpy.transpose(x_mat)
+	
+	xpoints = x_mat[~nan_filter]
+	ypoints = y_mat[~nan_filter]
+
+	# create the interpolant
+	points = (xpoints, ypoints)
+
+	values = not_nan
+	out_xpoints = range(0,n)
+	out_ypoints = range(0,n)
+	grid_x, grid_y = numpy.mgrid[0:n:1, 0:n:1]
+	xi = (grid_x, grid_y)
+	array_without_nan = \
+		scipy.interpolate.griddata(points, values, xi,\
+		 method='linear', fill_value=numpy.nan, rescale=False)
+	return array_without_nan
 
 def curvesfinder(array,values):
 
@@ -36,7 +65,12 @@ def curvesfinder(array,values):
 
 def curvefinder(array,level):
 	
-	time_mat = array['Travel time matrix']
+	time_mat_with_nans = array['Travel time matrix']
+
+	## replace nans with mean of neightbours
+	time_mat = eliminate_nans(time_mat_with_nans)
+
+
 
 	contours = skimage.measure.find_contours(time_mat,\
 		level, \
@@ -120,7 +154,7 @@ def read_array(filename):
 		lat_min = min(latitude,lat_min)
 		long_min = min(longitude,long_min)
 		if travel_time == -1:
-			travel_time = 999999
+			travel_time = numpy.nan
 		time_mat[x_i,y_i] = travel_time
 
 		
@@ -142,8 +176,9 @@ if __name__ == '__main__':
 	# call readarray on the relevant file
 	data = read_array(\
 		'bike_times_'+str(n)+'.geojson')
-	# print data
+	
 	levels = [3, 5, 7, 10, 20, 30]
+	#levels = [3]
 	levels[:] = [x*60 for x in levels] 
 
 	# call the curvesfinder with relevant values
