@@ -8,21 +8,13 @@ import numpy
 import scipy.interpolate
 import skimage.measure
 
-#only for debugging
-import matplotlib.pyplot as plt
-
-class InputDataError(Exception):
-     def __init__(self, message,calling_context):
-         self.message = message
-         self.calling_context = calling_context
-     def __str__(self):
-         return repr('Errorneous data fed to '+self.calling_context+':'+self.message)
-
 def eliminate_nans(array):
 
 	# check input
 	n,ny = array.shape
 	if n != ny:
+		# code designed for only handling square arrays.
+		# can easily be extended
 		raise ValueError('Not square array!')
 
 	# reshape the data for griddata
@@ -47,13 +39,13 @@ def eliminate_nans(array):
 		 method='linear', fill_value=numpy.nan, rescale=False)
 	return array_without_nan
 
-def curvesfinder(array,values):
+def find_level_sets(array,values):
 
 	# call the function for single values for each value
 	# assemble the featueres in a feature collection
 	features = []
 	for value in values:
-		json_features = curvefinder(array,value)
+		json_features = find_one_level_set(array,value)
 		features += json_features
 	
 	feature_collection = {\
@@ -63,14 +55,12 @@ def curvesfinder(array,values):
 	# print json.dumps(feature_collection,indent=1)
 	return feature_collection
 
-def curvefinder(array,level):
+def find_one_level_set(array,level):
 	
 	time_mat_with_nans = array['Travel time matrix']
 
-	## replace nans with mean of neightbours
+	## replace nans interpolation
 	time_mat = eliminate_nans(time_mat_with_nans)
-
-
 
 	contours = skimage.measure.find_contours(time_mat,\
 		level, \
@@ -113,13 +103,13 @@ def read_array(filename):
 
 	# check that its a proper file
 	if not(os.path.isfile(filename)):
-		raise InputDataError('read_array','File '+filename+'doesn\'t exist.')
+		raise ValueError('File '+filename+'doesn\'t exist.')
 
 	# check the file ending
 	filename_prefix, filename_suffix = os.path.splitext(filename)
 	accepted_file_endings=['.geojson', '.gjson', '.json']
 	if not(filename_suffix in accepted_file_endings):
-		raise InputDataError('read_array','Wrong file ending. Accepted are'+str(accepted_file_endings)+'. The file ending found was:'+filename_suffix)
+		raise ValueError('Wrong file ending. Accepted are'+str(accepted_file_endings)+'. The file ending found was:'+filename_suffix)
 
 	# check that the file is a geojson file
 	with codecs.open(filename, encoding='utf-8', mode="r") as input_file:
@@ -132,41 +122,32 @@ def read_array(filename):
 			raise StandardError('Something went wrong.')
 		else:
 			error_message = r.json()['status']
-			raise InputDataError('read_array','Data failed GeoJSON validation:'+error_message)
+			raise ValueError('Data failed GeoJSON validation:'+error_message)
 
 	# validate the number of data points and allocate some space
 	features = input_json['features']
 	n_float = math.sqrt(len(features))
 	n = int(n_float)
 	if not(n_float == n):
-		raise InputDataError('read_array','The data was not a perfect square!')
+		raise ValueError('The data was not a perfect square!')
 	long_min = lat_min = 180
 	long_max = lat_max = -180
 	time_mat = numpy.empty(shape=(n,n))
 
-
-
 	for feature in features:
-
 		y_i = feature['properties']['Latitude index']
 		x_i = feature['properties']['Longitude index']
 		travel_time = feature['properties']['Biking time [s]']
 		latitude = feature['geometry']['coordinates'][1]
 		longitude = feature['geometry']['coordinates'][0]
-
 		lat_max = max(latitude,lat_max)
 		long_max = max(longitude,long_max)
 		lat_min = min(latitude,lat_min)
 		long_min = min(longitude,long_min)
-
 		if travel_time == -1:
 			travel_time = numpy.nan
-
 		time_mat[x_i,y_i] = travel_time
 
-		
-
-	# return the matrices
 	
 	long_list = numpy.linspace(long_min,long_max,n)
 	lat_list = numpy.linspace(lat_min,lat_max,n)
@@ -184,9 +165,9 @@ if __name__ == '__main__':
 	data = read_array(\
 		'bike_times_'+str(n)+'.geojson')
 	
-	# call the curvesfinder with relevant values
+	# call the find_level_sets with relevant values
 	levels = [5*60, 10*60, 15*60, 20*60, 25*60, 30*60]
-	level_set_geojson = curvesfinder(data,levels)
+	level_set_geojson = find_level_sets(data,levels)
 
 	with codecs.open('level_sets_'+str(n)+'.geojson', encoding='utf-8',mode='w') as output_file:
             json.dump(level_set_geojson,output_file,indent=1,encoding="utf-8",ensure_ascii=False)
