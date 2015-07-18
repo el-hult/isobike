@@ -86,5 +86,5 @@ def fetch(n,origin,filename):
 if __name__ == '__main__':
     n = 50
     fetch(n,\
-        'Acando, Malmskillnadsgatan, Stockholm',\
+        'Sergels torg, Norrmalm, Stockholm, Sverige',\
         'bike_times_'+str(n))
