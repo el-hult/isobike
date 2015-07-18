@@ -6,8 +6,8 @@ function initialize() {
   }
   var map = new google.maps.Map(document.getElementById('map-canvas'), mapOptions);
 
-  map.data.loadGeoJson('bike_times_50.geojson');
-  map.data.loadGeoJson('level_sets_50.geojson');
+  map.data.loadGeoJson('database/bike_times_50.geojson');
+  map.data.loadGeoJson('database/level_sets_50.geojson');
 
   map.data.setStyle(function(feature) {
 
