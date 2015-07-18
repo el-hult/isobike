@@ -7,14 +7,6 @@ import json
 import codecs
 import time
 
-## Defining exceptions for easier troubleshooting.
-class APIError(Exception):
-     def __init__(self, value):
-         self.value = value
-     def __str__(self):
-         return repr(self.value)
-
-
 def fetch(n,origin,filename):
 
     lat1 = 59.29
@@ -53,7 +45,7 @@ def fetch(n,origin,filename):
                     biking_time = -1
                     final_address = 'N/A'
                 else:
-                    raise NotImplementedError('This element status is not handled. Result:\n'+content)
+                    raise ValueError('This element status is not handled. Result:\n'+content)
 
                 geom = {\
                     'type': 'Point', \
@@ -79,7 +71,7 @@ def fetch(n,origin,filename):
                 continue
 
             else:
-                raise APIError('Unknown querey status. Result:\n'+content)
+                raise ValueError('Unknown querey status. Result:\n'+content)
 
     json_object = {\
         'features': features,\
